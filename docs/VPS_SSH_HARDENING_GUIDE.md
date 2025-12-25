@@ -337,3 +337,91 @@ After confirming everything works, update your CI/CD:
 - Failed root logins are immediately rejected
 - All privileged actions require explicit sudo
 - Audit trail for sudo commands in /var/log/auth.log
+
+---
+
+## Container Security: Non-Root Users
+
+### Current Status
+
+| Container | Runs As | Should Be | Priority |
+|-----------|---------|-----------|----------|
+| coolify-* (6) | root | root (required) | N/A |
+| livekit | root | livekit (1000) | MEDIUM |
+| perf_mgmt_postgres | root | postgres (70) | HIGH |
+| managerhub-redis | root | redis (999) | HIGH |
+
+### TODO: Fix perf_mgmt_postgres
+
+**Risk: MEDIUM** - May need to fix volume permissions.
+
+```bash
+# 1. Check current volume permissions
+ssh hostinger-vps-auto 'docker volume inspect perf_mgmt_postgres_data'
+
+# 2. Update docker-compose.yml - add user directive
+#    In /root/docker-compose.yml, find perf_mgmt_postgres and add:
+#    user: "70:70"
+
+# 3. Fix volume permissions if needed
+ssh hostinger-vps-auto 'docker run --rm -v perf_mgmt_postgres_data:/data alpine chown -R 70:70 /data'
+
+# 4. Restart container
+ssh hostinger-vps-auto 'docker compose -f /root/docker-compose.yml up -d perf_mgmt_postgres'
+
+# 5. Verify
+ssh hostinger-vps-auto 'docker exec perf_mgmt_postgres id'
+# Expected: uid=70(postgres)
+```
+
+### TODO: Fix managerhub-redis
+
+**Risk: LOW** - Redis typically has no persistent data issues.
+
+```bash
+# 1. Update docker-compose.yml - add user directive
+#    user: "999:999"
+
+# 2. Restart
+ssh hostinger-vps-auto 'docker compose -f /root/docker-compose.yml up -d managerhub-redis'
+
+# 3. Verify
+ssh hostinger-vps-auto 'docker exec managerhub-redis id'
+# Expected: uid=999(redis)
+```
+
+### TODO: Fix livekit
+
+**Risk: MEDIUM** - Check if livekit supports non-root.
+
+```bash
+# 1. Check livekit docs for non-root support
+# 2. If supported, add to docker-compose.yml:
+#    user: "1000:1000"
+
+# 3. Test in non-production first
+```
+
+### Containers That MUST Run as Root
+
+These containers legitimately require root privileges:
+
+| Container | Why Root Required |
+|-----------|------------------|
+| coolify | Docker socket access for container management |
+| coolify-proxy | Bind ports 80/443 (privileged ports) |
+| coolify-sentinel | Docker event monitoring |
+| coolify-realtime | Docker socket access |
+| coolify-db | Coolify's internal database |
+| coolify-redis | Coolify's internal cache |
+
+### Verification Script
+
+Run this to check container user status:
+
+```bash
+ssh hostinger-vps-auto 'for c in $(docker ps --format "{{.Names}}"); do
+  user=$(docker inspect $c --format "{{.Config.User}}")
+  echo "$c: ${user:-root}"
+done'
+```
