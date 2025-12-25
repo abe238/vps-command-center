@@ -1,4 +1,5 @@
 import { ContainerStats, ContainerStatus, SecurityAudit } from '@/types';
+import http from 'http';
 
 const DOCKER_SOCKET = process.env.DOCKER_SOCKET || '/var/run/docker.sock';
 
@@ -59,19 +60,34 @@ interface DockerStatsStream {
   };
 }
 
-async function dockerFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const url = `http://localhost${path}`;
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
+async function dockerFetch<T>(path: string, options?: { method?: string }): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const req = http.request(
+      {
+        socketPath: DOCKER_SOCKET,
+        path,
+        method: options?.method || 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      },
+      (res) => {
+        let data = '';
+        res.on('data', (chunk) => { data += chunk; });
+        res.on('end', () => {
+          if (res.statusCode && res.statusCode >= 400) {
+            reject(new Error(`Docker API error: ${res.statusCode} ${res.statusMessage}`));
+            return;
+          }
+          try {
+            resolve(JSON.parse(data));
+          } catch {
+            reject(new Error('Failed to parse Docker API response'));
+          }
+        });
+      }
+    );
+    req.on('error', reject);
+    req.end();
   });
-  if (!response.ok) {
-    throw new Error(`Docker API error: ${response.status} ${response.statusText}`);
-  }
-  return response.json();
 }
 
 export async function listContainers(): Promise<DockerContainer[]> {
@@ -204,6 +220,20 @@ export async function restartContainer(id: string): Promise<void> {
 }
 
 export async function getContainerLogs(id: string, tail: number = 100): Promise<string> {
-  const response = await fetch(`http://localhost/containers/${id}/logs?stdout=true&stderr=true&tail=${tail}`);
-  return response.text();
+  return new Promise((resolve, reject) => {
+    const req = http.request(
+      {
+        socketPath: DOCKER_SOCKET,
+        path: `/containers/${id}/logs?stdout=true&stderr=true&tail=${tail}`,
+        method: 'GET',
+      },
+      (res) => {
+        let data = '';
+        res.on('data', (chunk) => { data += chunk; });
+        res.on('end', () => resolve(data));
+      }
+    );
+    req.on('error', reject);
+    req.end();
+  });
 }
