@@ -1,11 +1,17 @@
-# Add this service to /root/docker-compose.yml on VPS
-# This file is for reference only
+# Add this service to /home/deploy/docker-compose.yml on VPS
+# Zero-downtime deployment: scaling requires NO container_name
 
 services:
   vps-command-center:
     image: ghcr.io/abe238/vps-command-center:latest
-    container_name: root-vps-command-center-1
+    # NOTE: No container_name - allows docker compose scale for zero-downtime
     restart: always
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /var/log:/host-logs:ro

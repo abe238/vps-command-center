@@ -58,9 +58,18 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: deploy
           key: ${{ secrets.VPS_SSH_KEY }}
+          envs: GHCR_TOKEN
           script: |
+            set -e
             cd /home/deploy
+
+            # Login to GHCR
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u abe238 --password-stdin
+
+            # Pull and deploy
             docker compose pull vps-command-center
             docker compose up -d vps-command-center
-            sleep 5
+            sleep 10
             docker compose ps vps-command-center
+        env:
+          GHCR_TOKEN: ${{ secrets.GHCR_PAT }}
