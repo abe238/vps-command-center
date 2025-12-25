@@ -68,9 +68,11 @@ jobs:
             # Login to GHCR
             echo "$GHCR_TOKEN" | docker login ghcr.io -u abe238 --password-stdin
 
-            # Pull and deploy (force recreate to apply new image)
+            # Pull and deploy (stop, remove, recreate to apply new image)
             docker compose pull vps-command-center
-            docker compose up -d --force-recreate vps-command-center
+            docker compose stop vps-command-center || true
+            docker compose rm -f vps-command-center || true
+            docker compose up -d vps-command-center
             sleep 10
             docker compose ps vps-command-center
         env:
