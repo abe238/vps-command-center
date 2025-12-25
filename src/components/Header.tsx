@@ -41,7 +41,7 @@ export function Header({ system, lastUpdate, isLive = false }: HeaderProps) {
                   system.cpuPercent > 50 ? 'text-[var(--status-warning)]' :
                   'text-[var(--text-primary)]'
                 }`}>
-                  {system.cpuPercent.toFixed(1)}%
+                  {(system.cpuPercent ?? 0).toFixed(1)}%
                 </p>
               </div>
               <div className="text-right">
@@ -51,7 +51,7 @@ export function Header({ system, lastUpdate, isLive = false }: HeaderProps) {
                   system.memoryPercent > 50 ? 'text-[var(--status-warning)]' :
                   'text-[var(--text-primary)]'
                 }`}>
-                  {system.memoryPercent.toFixed(1)}%
+                  {(system.memoryPercent ?? 0).toFixed(1)}%
                 </p>
               </div>
               <div className="text-right">
@@ -61,7 +61,7 @@ export function Header({ system, lastUpdate, isLive = false }: HeaderProps) {
                   system.diskPercent > 70 ? 'text-[var(--status-warning)]' :
                   'text-[var(--text-primary)]'
                 }`}>
-                  {system.diskPercent.toFixed(1)}%
+                  {(system.diskPercent ?? 0).toFixed(1)}%
                 </p>
               </div>
               <div className="text-right">

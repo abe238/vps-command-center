@@ -18,7 +18,7 @@ function formatBytes(bytes: number): string {
 }
 
 function formatPercent(value: number): string {
-  return `${value.toFixed(1)}%`;
+  return `${(value ?? 0).toFixed(1)}%`;
 }
 
 export function ContainerCard({ container, appName, domain }: ContainerCardProps) {

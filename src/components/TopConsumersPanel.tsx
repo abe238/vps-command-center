@@ -102,7 +102,7 @@ export function TopConsumersPanel() {
                           {formatContainerName(item.container)}
                         </span>
                         <span className="text-xs font-data text-[var(--text-secondary)]">
-                          {item.avg.toFixed(1)}%
+                          {(item.avg ?? 0).toFixed(1)}%
                         </span>
                       </div>
                       <div className="h-1.5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
