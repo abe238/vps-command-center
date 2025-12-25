@@ -63,17 +63,35 @@ jobs:
           envs: GHCR_TOKEN
           script: |
             set -e
-            cd /home/deploy
 
             # Login to GHCR
             echo "$GHCR_TOKEN" | docker login ghcr.io -u abe238 --password-stdin
 
-            # Pull and deploy (stop, remove, recreate to apply new image)
-            docker compose pull vps-command-center
-            docker compose stop vps-command-center || true
-            docker compose rm -f vps-command-center || true
-            docker compose up -d vps-command-center
-            sleep 10
-            docker compose ps vps-command-center
+            # Pull new image
+            docker pull ghcr.io/abe238/vps-command-center:latest
+
+            # Stop and remove existing container
+            docker rm -f root-vps-command-center-1 || true
+
+            # Start new container with same config as docker-compose
+            docker run -d \
+              --name root-vps-command-center-1 \
+              --restart always \
+              --group-add 988 \
+              -v /var/run/docker.sock:/var/run/docker.sock:ro \
+              -v /var/log:/host-logs:ro \
+              -v /var/lib/vps-metrics:/data/metrics \
+              -e NODE_ENV=production \
+              --network coolify \
+              -l "traefik.enable=true" \
+              -l "traefik.http.routers.vps-dashboard.rule=Host(\`vps.srv944870.hstgr.cloud\`)" \
+              -l "traefik.http.routers.vps-dashboard.tls=true" \
+              -l "traefik.http.routers.vps-dashboard.entrypoints=https" \
+              -l "traefik.http.routers.vps-dashboard.tls.certresolver=letsencrypt" \
+              -l "traefik.http.services.vps-dashboard.loadbalancer.server.port=3000" \
+              ghcr.io/abe238/vps-command-center:latest
+
+            sleep 5
+            docker ps | grep vps-command-center
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
