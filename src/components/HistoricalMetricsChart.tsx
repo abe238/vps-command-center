@@ -160,7 +160,7 @@ export function HistoricalMetricsChart() {
             <YAxis
               tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
               stroke="var(--border-subtle)"
-              tickFormatter={val => metric === 'cpu' ? `${val.toFixed(0)}%` : formatBytes(val)}
+              tickFormatter={val => metric === 'cpu' ? `${(val ?? 0).toFixed(0)}%` : formatBytes(val ?? 0)}
               width={60}
             />
             <Tooltip
@@ -182,8 +182,8 @@ export function HistoricalMetricsChart() {
                       <div key={entry.dataKey} style={{ color: entry.color, marginBottom: '2px' }}>
                         {String(entry.name).replace(/^root[-_]?/, '').replace(/-1$/, '')} : {
                           metric === 'cpu'
-                            ? `${(entry.value as number).toFixed(2)}%`
-                            : formatBytes(entry.value as number)
+                            ? `${((entry.value as number) ?? 0).toFixed(2)}%`
+                            : formatBytes((entry.value as number) ?? 0)
                         }
                       </div>
                     ))}
