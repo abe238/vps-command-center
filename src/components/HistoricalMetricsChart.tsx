@@ -164,17 +164,32 @@ export function HistoricalMetricsChart() {
               width={60}
             />
             <Tooltip
-              contentStyle={{
-                backgroundColor: 'var(--bg-secondary)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: '4px',
-                fontSize: '12px',
+              content={({ active, payload, label }) => {
+                if (!active || !payload?.length) return null;
+                const sorted = [...payload]
+                  .filter(p => p.value !== undefined && p.value !== null)
+                  .sort((a, b) => (b.value as number) - (a.value as number));
+                return (
+                  <div style={{
+                    backgroundColor: 'var(--bg-secondary)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: '4px',
+                    padding: '8px 12px',
+                    fontSize: '12px',
+                  }}>
+                    <div style={{ marginBottom: '6px', color: 'var(--text-primary)' }}>{label}</div>
+                    {sorted.map((entry) => (
+                      <div key={entry.dataKey} style={{ color: entry.color, marginBottom: '2px' }}>
+                        {String(entry.name).replace(/^root[-_]?/, '').replace(/-1$/, '')} : {
+                          metric === 'cpu'
+                            ? `${(entry.value as number).toFixed(2)}%`
+                            : formatBytes(entry.value as number)
+                        }
+                      </div>
+                    ))}
+                  </div>
+                );
               }}
-              formatter={(value: number | undefined) =>
-                value !== undefined
-                  ? metric === 'cpu' ? `${value.toFixed(2)}%` : formatBytes(value)
-                  : '--'
-              }
             />
             <Legend
               wrapperStyle={{ fontSize: '10px' }}
