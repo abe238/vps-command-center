@@ -1,0 +1,35 @@
+# Add this service to /root/docker-compose.yml on VPS
+# This file is for reference only
+
+services:
+  vps-command-center:
+    image: ghcr.io/abe238/vps-command-center:latest
+    container_name: root-vps-command-center-1
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/log:/host-logs:ro
+    environment:
+      - NODE_ENV=production
+      - COOLIFY_API_TOKEN=${COOLIFY_API_TOKEN:-}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.vps-dashboard.rule=Host(`vps.srv944870.hstgr.cloud`)
+      - traefik.http.routers.vps-dashboard.tls=true
+      - traefik.http.routers.vps-dashboard.entrypoints=web,websecure
+      - traefik.http.routers.vps-dashboard.tls.certresolver=mytlschallenge
+      - traefik.http.services.vps-dashboard.loadbalancer.server.port=3000
+    expose:
+      - "3000"
+    networks:
+      - coolify
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/"]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+
+networks:
+  coolify:
+    external: true

@@ -1,26 +1,165 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Industrial/Mission Control Color Palette */
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #12121a;
+  --bg-tertiary: #1a1a24;
+  --bg-card: #15151f;
+
+  /* Status Colors */
+  --status-healthy: #00ff88;
+  --status-warning: #ffaa00;
+  --status-critical: #ff3355;
+  --status-info: #0088ff;
+  --status-offline: #666680;
+
+  /* Text Colors */
+  --text-primary: #e0e0e8;
+  --text-secondary: #808090;
+  --text-muted: #505060;
+
+  /* Accent */
+  --accent-glow: rgba(0, 255, 136, 0.15);
+  --border-subtle: #252530;
+  --border-active: #353545;
+
+  /* Scanline effect */
+  --scanline-color: rgba(0, 255, 136, 0.03);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+  --color-bg-card: var(--bg-card);
+  --color-healthy: var(--status-healthy);
+  --color-warning: var(--status-warning);
+  --color-critical: var(--status-critical);
+  --color-info: var(--status-info);
+  --color-offline: var(--status-offline);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-active: var(--border-active);
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'IBM Plex Sans', sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 14px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'IBM Plex Sans', sans-serif;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* CRT Scanline overlay effect */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    var(--scanline-color) 2px,
+    var(--scanline-color) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Status indicator pulse animation */
+@keyframes pulse-healthy {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); }
+}
+
+@keyframes pulse-warning {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 170, 0, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(255, 170, 0, 0); }
+}
+
+@keyframes pulse-critical {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 51, 85, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(255, 51, 85, 0); }
+}
+
+.pulse-healthy { animation: pulse-healthy 2s infinite; }
+.pulse-warning { animation: pulse-warning 1.5s infinite; }
+.pulse-critical { animation: pulse-critical 1s infinite; }
+
+/* Heartbeat animation for live containers */
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.heartbeat {
+  animation: heartbeat var(--beat-duration, 1s) ease-in-out infinite;
+}
+
+/* Monospace data display */
+.font-data {
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Card styling */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+}
+
+.card:hover {
+  border-color: var(--border-active);
+}
+
+/* Status LED indicator */
+.status-led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-led.healthy { background: var(--status-healthy); }
+.status-led.warning { background: var(--status-warning); }
+.status-led.critical { background: var(--status-critical); }
+.status-led.offline { background: var(--status-offline); }
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-active);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
