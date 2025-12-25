@@ -58,7 +58,7 @@ export function CronJobPanel({ jobs }: CronJobPanelProps) {
                   job.lastStatus === 'success' ? 'text-[var(--status-healthy)]' :
                   job.lastStatus === 'failed' ? 'text-[var(--status-critical)]' :
                   'text-[var(--text-muted)]'
-                }`}>
+                }`} suppressHydrationWarning>
                   {timeAgo(job.lastRun)}
                   {job.lastStatus === 'success' && ' ✓'}
                   {job.lastStatus === 'failed' && ' ✗'}

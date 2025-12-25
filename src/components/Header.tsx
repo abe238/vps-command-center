@@ -80,7 +80,7 @@ export function Header({ system, lastUpdate, isLive = false }: HeaderProps) {
               {isLive ? 'LIVE' : 'OFFLINE'}
             </span>
             {lastUpdate && (
-              <span className="text-xs text-[var(--text-muted)] font-data">
+              <span className="text-xs text-[var(--text-muted)] font-data" suppressHydrationWarning>
                 {new Date(lastUpdate).toLocaleTimeString()}
               </span>
             )}
