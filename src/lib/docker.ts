@@ -195,16 +195,17 @@ export async function getSecurityAudit(): Promise<SecurityAudit[]> {
     try {
       const inspect = await inspectContainer(container.Id);
       const userConfig = inspect.Config.User || '';
+      const isEmptyOrRoot = userConfig === '' || userConfig === 'root';
       const uid = userConfig.includes(':') ? parseInt(userConfig.split(':')[0]) :
                   /^\d+$/.test(userConfig) ? parseInt(userConfig) :
-                  userConfig === '' || userConfig === 'root' ? 0 : -1;
+                  isEmptyOrRoot ? 0 : null;
 
       audits.push({
         containerId: container.Id.substring(0, 12),
         containerName: inspect.Name.replace(/^\//, ''),
         user: userConfig || 'root',
-        uid: uid >= 0 ? uid : 0,
-        isRoot: uid === 0 || userConfig === '' || userConfig === 'root',
+        uid: uid ?? 'N/A',
+        isRoot: isEmptyOrRoot,
         lastAudit: new Date().toISOString(),
       });
     } catch (error) {

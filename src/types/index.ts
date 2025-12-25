@@ -74,7 +74,7 @@ export interface SecurityAudit {
   containerId: string;
   containerName: string;
   user: string;
-  uid: number;
+  uid: number | string;
   isRoot: boolean;
   lastAudit: string;
 }
