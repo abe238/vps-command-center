@@ -15,9 +15,13 @@ COPY . .
 # Build the app
 RUN npm run build
 
-# Production stage - use unprivileged nginx for static export
-# But since Next.js needs Node runtime, we use node:alpine
+# Production stage
 FROM node:20-alpine AS runner
+
+# Link package to repository for visibility inheritance
+LABEL org.opencontainers.image.source=https://github.com/abe238/vps-command-center
+LABEL org.opencontainers.image.description="VPS Command Center Dashboard"
+LABEL org.opencontainers.image.licenses=MIT
 
 WORKDIR /app
 
