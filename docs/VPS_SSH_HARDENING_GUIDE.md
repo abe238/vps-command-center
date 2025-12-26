@@ -1,8 +1,17 @@
 # VPS SSH Hardening Guide
 
-This guide walks through creating a non-root deploy user and disabling root SSH access on your Hostinger VPS.
+This guide walks through creating a non-root deploy user on your Hostinger VPS.
 
 **Server:** 72.60.28.52 (srv944870.hstgr.cloud)
+
+## TL;DR - Recommended Approach
+
+1. **Do Steps 1-6:** Create `deploy` user with sudo + docker access
+2. **Skip Step 7:** Keep root SSH working as backup
+3. **Daily use:** `ssh hostinger-vps-deploy` then `sudo -i` when you need root
+4. **Emergency:** Hostinger console at hpanel.hostinger.com
+
+This gives you security benefits without lockout risk.
 
 ---
 
@@ -183,7 +192,15 @@ ssh hostinger-vps-deploy "whoami && docker ps --format '{{.Names}}' | head -3"
 
 ---
 
-## Step 7: Disable Root SSH Login
+## Step 7: Disable Root SSH Login (OPTIONAL)
+
+> **You can skip this step entirely.** After completing Steps 1-6, you have:
+> - A working `deploy` user with sudo access
+> - `sudo -i` to become root anytime
+> - Hostinger console as emergency backup
+>
+> **Skipping this step means:** Root SSH still works, but you have `deploy` as your main user.
+> This is a valid security posture - you're no longer *always* root.
 
 **RISK: HIGH - THIS CAN LOCK YOU OUT**
 
